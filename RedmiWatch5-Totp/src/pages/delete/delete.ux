@@ -1,0 +1,76 @@
+<template>
+  <div class="main">
+    <div style="width: 100%;margin-bottom: 20px;margin-top: 0px">
+      <text style="width:20%; text-align: center" @click="back()">x</text>
+      <text style="flex: 1; text-align: center">TOTP</text>
+      <text style="width:20%; text-align: center" @click="save()">o</text>
+    </div>
+    <scroll style="flex-direction: column;width: 100%;flex: 1" scroll-y="{{true}}">
+      <div if="{{list.length===0}}">
+        <text style="width: 100%;margin-top: 100px;text-align: center">list is empty</text>
+      </div>
+      <div else for="(i, li) in list">
+        <text class="delete" @click="deleteList(i)">-</text>
+        <text class="item">{{li.name}}</text>
+      </div>
+    </scroll>
+    
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from '@system.storage' 
+
+export default {
+  private: {
+    list: [],
+  },
+  onShow() {
+    const self = this
+    storage.get({
+      key: 'totpList',
+      success: function(getData) {
+        if(!getData) getData = '{"list":[]}'
+        let data = JSON.parse(getData)
+        self.list = data.list
+      },
+      fail: function(getData, code) {
+        console.log(`getData fail, code = ${code}`)
+      }
+    })
+  },
+  deleteList(num) {
+    const self = this
+    self.list.splice(num, 1)
+  },
+  back() {
+    router.back()
+  },
+  save() {
+    const self = this
+    const data = {list: self.list}
+    storage.set({
+      key: 'totpList',
+      value: JSON.stringify(data),
+      success: function(setData) {
+        console.log('setData success!!! ', setData)
+        router.back()
+      },
+      fail: function(setData, code) {
+        console.log(`setData fail, code = ${code}`)
+      }
+    })
+  }
+}
+</script>
+
+<style>
+  @import '../../common/common.css';
+  .delete {
+    background-color:red;
+    border-radius: 80px;
+    margin: 0 10px 20px;
+    padding: 10px 30px;
+  }
+</style>

@@ -1,0 +1,88 @@
+<template>
+  <div class="main">
+    <div style="width: 100%;margin-bottom: 20px;margin-top: 0px">
+      <text if="{{list.length!==0}}" style="width:20%; text-align: center" @click="routeDelete()">-</text>
+      <text style="flex: 1; text-align: center">TOTP</text>
+      <text style="width:20%; text-align: center" @click="routeAdd()">+</text>
+    </div>
+    <scroll style="flex-direction: column;width: 100%;flex: 1" scroll-y="{{true}}">
+      <div if="{{list.length===0}}">
+        <text style="width: 100%;margin-top: 100px;text-align: center" @click="test()">list is empty</text>
+      </div>
+      <div else class="item" for="li in list" @click="routeDetail(li)">
+        <text>{{li.name}}</text>
+      </div>
+    </scroll>
+    
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from '@system.storage' 
+
+export default {
+  private: {
+    list: [],
+  },
+  onShow() {
+    const self = this
+    storage.get({
+      key: 'totpList',
+      success: function(getData) {
+        if(!getData) getData = '{"list":[]}'
+        let data = JSON.parse(getData)
+        self.list = data.list
+      },
+      fail: function(getData, code) {
+        console.log(`getData fail, code = ${code}`)
+      }
+    })
+  },
+  routeAdd() {
+    router.push({
+      uri: "/pages/add"
+    })
+  },
+  routeDelete() {
+    router.push({
+      uri: "/pages/delete"
+    })
+  },
+  routeDetail(param) {
+    router.push({
+      uri: "/pages/detail",
+      params: param
+    })
+  },
+  test() {
+    storage.get({
+      key: 'totpList',
+      success: function(getData) {
+        if(!getData) getData = '{"list":[]}'
+        let data = JSON.parse(getData)
+        data.list.push({ name: 'test', secretKey: 'secret', timeout: '30' })
+
+        storage.set({
+          key: 'totpList',
+          value: JSON.stringify(data),
+          success: function(setData) {
+            console.log('setData success!!! ', setData)
+          },
+          fail: function(setData, code) {
+            console.log(`setData fail, code = ${code}`)
+          }
+        })
+
+      },
+      fail: function(getData, code) {
+        console.log(`getData fail, code = ${code}`)
+      }
+    })
+  }
+}
+</script>
+
+<style>
+  @import '../../common/common.css';
+</style>

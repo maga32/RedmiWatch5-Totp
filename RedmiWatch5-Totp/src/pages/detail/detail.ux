@@ -1,0 +1,81 @@
+<template>
+  <div class="main">
+    <div style="width: 100%;margin-bottom: 20px;margin-top: 0px">
+      <text style="width:20%; text-align: center" @click="back()">&lt;</text>
+      <text style="flex: 1; text-align: center">TOTP</text>
+      <text style="width:20%"></text>
+    </div>
+    <text style="font-size: 70px;text-align: center;width: 100%;font-weight: bold;margin-top: 40px">{{code}}</text>
+    <stack style="justify-content: center;align-items: center;flex: 1">
+      <progress class="arc" percent="{{percent}}" type="arc"></progress>
+      <text style="font-size: 40px;font-weight: bold">{{remain}}</text>
+    </stack>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import {TOTP, Secret} from './otpauth.esm.min.js'
+
+let timer = null
+let timer2 = null
+export default {
+  private: {
+    code: '000000',
+    name: "TOTP",
+    secretKey: "secretKey",
+    remain: 30,
+    timeout: 30,
+    percent: 100,
+  },
+  onShow() {
+    this.timeout = this.timeout ?? 30
+    this.remain = Number(this.timeout)
+    this.percent = 100
+    this.update()
+    try {
+      clearInterval(timer)
+      clearInterval(timer2)
+    } catch (e) {
+
+    }
+
+    timer = setInterval(this.update, Number(this.timeout) * 1000)
+    timer2 = setInterval(() => {
+      this.remain = this.remain - 1
+      if (this.remain < 0) {
+        this.remain = Number(this.timeout)
+      }
+      this.percent = (this.remain / Number(this.timeout)) * 100
+    }, 1000)
+  },
+  back() {
+    router.back()
+  },
+  update() {
+    try {
+      const totp = new TOTP({
+        secret: this.secretKey,
+      })
+      this.code = totp.generate();
+    } catch (e) {
+      this.log = "err" + e;
+    }
+  }
+}
+</script>
+
+
+<style>
+  @import '../../common/common.css';
+
+  .arc {
+    height: 100%;
+    stroke-width: 16px;
+    start-angle: 0;
+    total-angle: 360deg;
+    radius: 60px;
+    color: #ffffff;
+    layer-color: rgba(72, 69, 69, 0.9);
+  }
+</style>

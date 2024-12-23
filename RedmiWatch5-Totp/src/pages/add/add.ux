@@ -1,0 +1,123 @@
+<template>
+  <div class="main">
+    <div style="width: 100%;margin-bottom: 20px;margin-top: 0px">
+      <text style="width:20%; text-align: center" @click="back()">&lt;</text>
+      <text style="flex: 1; text-align: center">TOTP</text>
+      <text style="width:20%;"></text>
+    </div>
+    <scroll style="flex-direction: column;width: 100%;flex: 1" scroll-y="{{true}}">
+      <div if="{{qrLink}}" style="flex-direction: column">
+        <qrcode class="br" value="{{qrLink}}"></qrcode>
+        <text class="br">{{qrLink}}</text>
+        <text class="item" @click="save()">Touch here to save after submit in the web</text>
+      </div>
+      <text else>loading...</text>
+    </scroll>
+    <text class="alert" if="{{alert}}">{{alertString}}</text>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import fetch from '@system.fetch'
+import storage from '@system.storage' 
+
+export default {
+  private: {
+    uuid: "",
+    qrLink: "",
+
+    alert: false,
+    alertString: "",
+  },
+  onReady() {
+    const self = this
+    const content = `<form action="?form=ok" method="POST">
+        <label for="name">저장할이름:</label>
+        <input type="text" id="name" name="name" required>
+        <br>
+        <label for="secretKey">시크릿키:</label>
+        <input type="text" id="secretKey" name="secretKey" required>
+        <br>
+        <label for="timeout">타임아웃(초):</label>
+        <input type="number" id="timeout" name="timeout" value="30" required>
+        <br>
+        <button id="submit" type="submit">전송</button><span>=>전송 후 워치에서 이어서 진행</span>
+      </form>`;
+
+    fetch.fetch({
+      url: 'https://webhook.site/token',
+      method: 'POST',
+      data: {"default_content": content},
+      success: function (response) {
+        self.uuid = response.data.uuid
+        self.qrLink = 'https://webhook.site/' + self.uuid
+        console.log(`response:: ${JSON.stringify(response.data)}`)
+      },
+      fail: function (data, code) {
+        console.log(`handling fail, errMsg = ${data}`)
+        console.log(`handling fail, errCode = ${code}`)
+      }
+    });
+  },
+  back() {
+    router.back()
+  },
+  save() {
+    const self = this
+    fetch.fetch({
+      url: `https://webhook.site/token/${self.uuid}/requests?query=query.form:ok&sorting=newest&per_page=1`,
+      method: 'GET',
+      success: function (response) {
+        if(!response.data.total) {
+          self.alertMessage('Try it again after submit from the web')
+        } else {
+          //{ name: 'test', secretKey: 'secret', timeout: '30' }
+          console.log("data :: ", response.data.data[0].request)
+
+          storage.get({
+            key: 'totpList',
+            success: function(getData) {
+              if(!getData) getData = '{"list":[]}'
+              let data = JSON.parse(getData)
+              data.list.push(response.data.data[0].request)
+
+              storage.set({
+                key: 'totpList',
+                value: JSON.stringify(data),
+                success: function(setData) {
+                  console.log('setData success!!! ', setData)
+                  router.back()
+                },
+                fail: function(setData, code) {
+                  console.log('setData fail!!! ', setData)
+                }
+              })
+
+            },
+            fail: function(getData, code) {
+              console.log('getData fail!!! ', getData)
+            }
+          })
+
+        }
+        console.log(`response:: ${JSON.stringify(response.data)}`)
+      },
+      fail: function (data, code) {
+        console.log(`handling fail, errMsg = ${data}`)
+        console.log(`handling fail, errCode = ${code}`)
+      }
+    });
+  },
+  alertMessage(str='', time=5000) {
+    this.alert = true
+    this.alertString = str
+
+    setTimeout(() => {this.alert = false}, time)
+  },
+}
+</script>
+
+<style>
+  @import '../../common/common.css';
+</style>
