@@ -12,7 +12,8 @@
     { "name": "system.router" },
     { "name": "system.fetch" },
     { "name": "system.request" },
-    { "name": "system.storage" }
+    { "name": "system.storage" },
+    { "name": "system.prompt" }
   ],
   "config": {
     "logLevel": "log",
@@ -32,6 +33,9 @@
       },
       "pages/detail": {
         "component": "detail"
+      },
+      "pages/developer": {
+        "component": "developer"
       }
     }
   }
