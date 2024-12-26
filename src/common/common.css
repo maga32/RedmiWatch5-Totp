@@ -22,12 +22,16 @@
     color: white;
   }
 
-  .alert {
-    color: red;
-    padding: 15px;
-    border-radius: 30px;
-    background-color: white;
-    border: solid black 1px;
+  .font-30 {
+   font-size: 30px; 
+  }
+
+  .font-35 {
+   font-size: 35px; 
+  }
+
+  .font-40 {
+   font-size: 40px; 
   }
 
   .br {

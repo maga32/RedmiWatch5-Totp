@@ -1,9 +1,9 @@
 <template>
   <div class="main">
     <div style="width: 100%;margin-bottom: 20px;margin-top: 0px">
-      <text style="width:20%; text-align: center" @click="back()">&lt;</text>
-      <text style="flex: 1; text-align: center">TOTP</text>
-      <text style="width:20%;"></text>
+      <text class="font-40" style="width:20%; text-align: center" @click="back()">&lt;</text>
+      <text class="font-40" style="flex: 1; text-align: center">TOTP</text>
+      <text class="font-40" style="width:20%;"></text>
     </div>
     <scroll style="flex-direction: column;width: 100%;flex: 1" scroll-y="{{true}}">
       <div if="{{qrLink}}" style="flex-direction: column">
@@ -13,7 +13,6 @@
       </div>
       <text else>loading...</text>
     </scroll>
-    <text class="alert" if="{{alert}}">{{alertString}}</text>
   </div>
 </template>
 
@@ -21,14 +20,12 @@
 import router from "@system.router"
 import fetch from '@system.fetch'
 import storage from '@system.storage' 
+import prompt from '@system.prompt'
 
 export default {
   private: {
     uuid: "",
     qrLink: "",
-
-    alert: false,
-    alertString: "",
   },
   onReady() {
     const self = this
@@ -70,7 +67,10 @@ export default {
       method: 'GET',
       success: function (response) {
         if(!response.data.total) {
-          self.alertMessage('Try it again after submit from the web')
+          prompt.showToast({
+            message: 'Try it again after submit from the web',
+            duration: 4000
+          })
         } else {
           //{ name: 'test', secretKey: 'secret', timeout: '30' }
           console.log("data :: ", response.data.data[0].request)
@@ -108,13 +108,7 @@ export default {
         console.log(`handling fail, errCode = ${code}`)
       }
     });
-  },
-  alertMessage(str='', time=5000) {
-    this.alert = true
-    this.alertString = str
-
-    setTimeout(() => {this.alert = false}, time)
-  },
+  }
 }
 </script>
 
