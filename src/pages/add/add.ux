@@ -29,18 +29,9 @@ export default {
   },
   onReady() {
     const self = this
-    const content = `<form action="?form=ok" method="POST">
-        <label for="name">저장할이름:</label>
-        <input type="text" id="name" name="name" required>
-        <br>
-        <label for="secretKey">시크릿키:</label>
-        <input type="text" id="secretKey" name="secretKey" required>
-        <br>
-        <label for="timeout">타임아웃(초):</label>
-        <input type="number" id="timeout" name="timeout" value="30" required>
-        <br>
-        <button id="submit" type="submit">전송</button><span>=>전송 후 워치에서 이어서 진행</span>
-      </form>`;
+    const content = `전송완료! 워치에서 이어서 진행해주세요.<br>
+    (워치 QR 및 링크 하단쪽 버튼 터치)<br>
+    [Touch here to save after submit in the web]`;
 
     fetch.fetch({
       url: 'https://webhook.site/token',
@@ -48,7 +39,7 @@ export default {
       data: {"default_content": content},
       success: function (response) {
         self.uuid = response.data.uuid
-        self.qrLink = 'https://webhook.site/' + self.uuid
+        self.qrLink = 'https://sh-share.pages.dev/rw-totp?uuid=' + self.uuid
         console.log(`response:: ${JSON.stringify(response.data)}`)
       },
       fail: function (data, code) {
